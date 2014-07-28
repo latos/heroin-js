@@ -1,0 +1,26 @@
+{
+  "name": "hxroin",
+  "version": "0.0.0",
+  "description": "Scope-based dependency injection",
+  "main": "heroin.js",
+  "scripts": {
+    "test": "true"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/latos/heroin-js.git"
+  },
+  "keywords": [
+    "heroin",
+    "hxroin",
+    "di",
+    "dependency",
+    "injection"
+  ],
+  "author": "Daniel Danilatos <daniel@helixta.com.au>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/latos/heroin-js/issues"
+  },
+  "homepage": "https://github.com/latos/heroin-js"
+}

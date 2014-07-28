@@ -1,0 +1,25 @@
+{
+  "name": "heroin",
+  "version": "0.0.0",
+  "homepage": "https://github.com/latos/heroin-js",
+  "authors": [
+    "Daniel Danilatos <daniel@helixta.com.au>"
+  ],
+  "description": "Scope-based dependency injection",
+  "main": "heroin.js",
+  "keywords": [
+    "heroin",
+    "dependency",
+    "injection",
+    "di",
+    "scope"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
