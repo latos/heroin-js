@@ -47,16 +47,18 @@
   function Injector(parent, values, providers) {
     var me;
     this.parent = parent;
-    this.values = values != null ? values : {};
-    this.providers = providers != null ? providers : {};
+    this.values = values || {};
+    this.providers = providers || {};
     me = this;
     this.values.$injector = this;
+    this.values.di = this;
     this.values.make = function(ctor, extraArgs) {
-      return me.instantiate(ctor, extraArgs);
+      return new Injector(me, extraArgs).instantiate(ctor);
     };
     this.values.invoke = function(func, extraArgs) {
       return me.invoke(func, extraArgs);
     };
+    this.make = this.values.make;
 
     // Use the parent's annotate function if present, otherwise funcParams.
     // E.g. if the ultimate ancestor is angular's injector, we will automatically
@@ -64,8 +66,12 @@
     this.annotate = (parent && parent.annotate) || funcParams;
   }
 
-  Injector.prototype.child = function(values, providers) {
-    return new Injector(this, values, providers);
+  Injector.prototype.child = function(mappings) {
+    var child = new Injector(this);
+    if (mappings) {
+      child.load(mappings);
+    }
+    return child;
   };
 
   // Resolution
@@ -106,7 +112,7 @@
     return instance;
   };
 
-  Injector.prototype.resolve = function(funcOrName) {
+  Injector.prototype.resolve = function(funcOrName) {   
     if (typeof funcOrName === 'function') {
       return this.invoke(funcOrName);
     } else {
@@ -166,11 +172,13 @@
   // Registration
 
   Injector.prototype.value = function(name, val) {
-    return this.values[this.checkNotRegistered(name)] = val;
+    this.values[this.checkNotRegistered(name)] = val;
+    return this;
   };
 
   Injector.prototype.provider = function(name, val) {
-    return this.providers[this.checkNotRegistered(name)] = val;
+    this.providers[this.checkNotRegistered(name)] = val;
+    return this;
   };
 
   /** Delegates to either .value or .provider depending on arg type */
@@ -180,6 +188,13 @@
     } else {
       return this.value(name, valOrFunc);
     }
+  };
+
+  Injector.prototype.load = function(map) {
+    for (var k in map) {
+      this.register(k, map[k]);
+    }
+    return this;
   };
 
 
@@ -238,23 +253,40 @@
       return this.values[name];
     }
     if (this.providers[name]) {
-      this.values[name] = this.invoke(this.providers[name], null);
+      var ret = this.values[name] = this.invoke(this.providers[name], null);
+      if (ret === void 0) {
+        throw new Error('provider returned undefined for ' + name);
+      }
+      return ret;
     }
-    return this.values[name];
+    return void 0;
   };
 
+  /**
+   * Gets the "raw" dep info, so, for values, the value, but
+   * for providers, the actual provider.  Does not resolve anything.
+   */
   Injector.prototype.rawGet = function(name) {
-    var val = this.values[name];
-    if (val !== void 0) {
-      return val;
-    }
-    val = this.providers[name];
-    if (val !== void 0) {
-      return val;
-    }
+    var val = this.localRawGet(name);
     if (this.parent) {
       return this.parent.rawGet(name);
     }
+    return void 0;
+  };
+
+  Injector.prototype.localRawGet = function(name) {
+    // Try providers first, because we cache vals,
+    // so this way we get the original raw value always.
+    var val = this.providers[name];
+    if (val !== void 0) {
+      return val;
+    }
+
+    val = this.values[name];
+    if (val !== void 0) {
+      return val;
+    }
+
     return void 0;
   };
 
@@ -263,7 +295,7 @@
   };
 
   Injector.prototype.localHas = function(name) {
-    return this.rawGet(name) !== void 0;
+    return this.localRawGet(name) !== void 0;
   };
 
   Injector.providerOfDep = function(name) {
@@ -295,9 +327,9 @@
     function Adaptor() {
       this.get = function(name, optional) {
         if (optional) {
-          return this.has(name) ? this.get(name) : void 0;
+          return this.has(name) ? $injector.get(name) : void 0;
         } else {
-          return this.get(name);
+          return $injector.get(name);
         }
       };
 
@@ -308,7 +340,7 @@
       }
     }
     Adaptor.prototype = $injector;
-    return new Injector(new Wrapped);
+    return new Injector(new Adaptor);
   };
 
   if (typeof exports === 'undefined') {
