@@ -59,6 +59,7 @@
       return me.invoke(func, extraArgs);
     };
     this.make = this.values.make;
+    this.make.__proto__ = this;
 
     // Use the parent's annotate function if present, otherwise funcParams.
     // E.g. if the ultimate ancestor is angular's injector, we will automatically
@@ -83,7 +84,7 @@
       return maybeVal;
     }
     if (this.parent) {
-      return this.parent.get(name);
+      return this.parent.get(name, optional);
     }
 
     if (!optional) {
@@ -148,7 +149,23 @@
 
       return func.apply(self, insertArgs(curried, arguments));
     };
+
+    // TODO: same as factory: extra curry.
   };
+
+
+  // method on func returned from factory & curry
+  // used to curry more things on.
+  function curryMore(moreExtra) {
+    var extras = {};
+    for (var k in this._extraArgs) {
+      extras[k] = this._extraArgs[k];
+    }
+    for (var k in moreExtra) {
+      extras[k] = moreExtra[k];
+    }
+    return this._di[this._type](this._ctor, extras);
+  }
 
   Injector.prototype.factory = function(ctor, extraArgs) {
     var curried, me = this;
@@ -157,15 +174,23 @@
     function Dummy() {};
     Dummy.prototype = ctor.prototype;
 
-    return function(/* args... */) {
+    var factoryFunc = function(/* args... */) {
       if (!curried) {
         curried = me.resolveArgs(ctor, extraArgs, true);
       }
 
       var instance = new Dummy;
-      func.apply(instance, insertArgs(curried, arguments));
+      ctor.apply(instance, insertArgs(curried, arguments));
       return instance;
-    }
+    };
+
+    factoryFunc._ctor = ctor;
+    factoryFunc._extraArgs = extraArgs;
+    factoryFunc._di = this;
+    factoryFunc._type = 'factory';
+    factoryFunc.curry = curryMore;
+
+    return factoryFunc;
   };
 
 
@@ -207,6 +232,7 @@
 
     // Duplicate loop, pull if stmt out of loop for speed.
     if (extras) {
+
       for (var i = 0; i < len; i++) {
         var name = names[i];
         args[i] = extras.hasOwnProperty(name) ? 
