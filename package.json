@@ -1,6 +1,6 @@
 {
   "name": "hxroin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Scope-based dependency injection",
   "main": "heroin.js",
   "scripts": {
