@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/latos/heroin-js/issues"
   },
-  "homepage": "https://github.com/latos/heroin-js"
+  "homepage": "https://github.com/latos/heroin-js",
+  "devDependencies": {
+    "jasmine-node": "1.14.5"
+  }
 }
