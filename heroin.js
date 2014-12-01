@@ -56,7 +56,7 @@
       return new Injector(me, extraArgs).instantiate(ctor);
     };
     this.values.invoke = function(func, extraArgs) {
-      return me.invoke(func, extraArgs);
+      return me.invoke(func, func, extraArgs);
     };
     this.make = this.values.make;
     this.make.__proto__ = this;
