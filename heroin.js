@@ -226,11 +226,10 @@
   // Helpers
 
   Injector.prototype.resolveArgs = function(func, extras, optional) {
-    var names = this.annotate(func);
+    var names = this.getArgs(func);
     var args = Array(names.length);
     var len = names.length;
 
-    // Duplicate loop, pull if stmt out of loop for speed.
     if (extras) {
 
       for (var i = 0; i < len; i++) {
@@ -246,6 +245,11 @@
 
     return args;
   };
+
+  /** Caching wrapper around annotate() */
+  Injector.prototype.getArgs = function(func) {
+    return func.$hxp || (func.$hxp = this.annotate(func));
+  }
 
   /**
    * func - function or name of function
