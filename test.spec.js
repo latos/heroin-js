@@ -147,5 +147,41 @@ describe('Injector', function() {
     expect(ranProvider).toBe(true);
   });
 
+  it('supports custom annotators passing injector as "this"', function() {
+
+    // Example implementation of an "optional_" prefix.
+
+    var PREFIX = 'optional_', PREFIX_LEN = PREFIX.length;
+    function useOptional(name) {
+      if (name.substr(0, PREFIX_LEN) == PREFIX) {
+        name = name.substr(PREFIX_LEN);
+        return this.has(name) ? name : '_NULL_';
+      }
+      return name;
+    }
+
+
+    var di = new Injector();
+    di.annotate = Injector.transformingAnnotator(useOptional, di.annotate);
+
+    di.value('_NULL_', null);
+
+    var di1 = di.child();
+    var di2 = di.child({bar: 5});
+
+    var bar1, bar2;
+
+    di1.invoke(function(optional_bar) {
+      bar1 = optional_bar;
+    });
+
+    di2.invoke(function(optional_bar) {
+      bar2 = optional_bar;
+    });
+
+    expect(bar1).toBe(null);
+    expect(bar2).toBe(5);
+  });
+
 });
 

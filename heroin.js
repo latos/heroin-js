@@ -67,6 +67,21 @@
     this.annotate = (parent && parent.annotate) || funcParams;
   }
 
+  Injector.funcParams = funcParams;
+
+  Injector.transformingAnnotator = function(mapFunc, chainedAnnotator) {
+    chainedAnnotator = chainedAnnotator || funcParams;
+
+    return function(fn) {
+      var names = chainedAnnotator.call(this, fn)
+      var l = names.length;
+      for (var i = 0; i < l; i++) {
+        names[i] = mapFunc.call(this, names[i]);
+      }
+      return names;
+    };
+  };
+
   Injector.prototype.child = function(mappings) {
     var child = new Injector(this);
     if (mappings) {
