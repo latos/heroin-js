@@ -321,7 +321,7 @@
   };
 
   Injector.prototype.has = function(name) {
-    return this.has(name) || (this.parent ? this.parent.has(name) : false);
+    return this.localHas(name) || (this.parent ? this.parent.has(name) : false);
   };
 
   Injector.prototype.localHas = function(name) {

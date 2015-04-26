@@ -113,6 +113,39 @@ describe('Injector', function() {
     expect(foo.bar).toBe(6);
   });
 
+  it('supports has() detection of deps without evaluating', function() {
+    var di = new Injector();
 
+    var ranProvider = false;
+
+    di.load({foo: function() {
+      ranProvider = true;
+      return 3;
+    }});
+    var di1 = di.child();
+    var di2 = di.child({bar: function() {
+      ranProvider = true;
+      return 5;
+    }});
+
+    expect(di.has('foo')).toBe(true);
+    expect(di.has('bar')).toBe(false);
+
+    expect(di1.has('foo')).toBe(true);
+    expect(di1.has('bar')).toBe(false);
+
+    expect(di2.has('foo')).toBe(true);
+    expect(di2.has('bar')).toBe(true);
+
+    expect(ranProvider).toBe(false);
+
+    expect(di2.get('bar')).toBe(5);
+    expect(ranProvider).toBe(true);
+
+    ranProvider = false;
+    expect(di1.get('foo')).toBe(3);
+    expect(ranProvider).toBe(true);
+  });
 
 });
+
