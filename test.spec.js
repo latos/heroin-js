@@ -1,4 +1,5 @@
 Injector = require('./heroin');
+coffee = require('coffee-script');
 
 function fail(msg) {
   throw new Error(msg || 'fail');
@@ -91,5 +92,27 @@ describe('Injector', function() {
     expect(invoked).toBe(true);
     expect(n).toBe(1);
   });
+
+  it('resolves coffeescript @names', function() {
+    // Coffee script occasionally decides to add
+    // various name munging strategies - let's track
+    // the latest version in our package.json and
+    // see if these simple tests ever break.
+
+    var Foo = coffee.eval('class Foo\n  constructor:(@bar)->');
+
+    inj = new Injector();
+    make = inj.make;
+
+    make.value('bar', 5);
+
+    foo = make(Foo);
+    expect(foo.bar).toBe(5);
+
+    foo = make(Foo, {bar: 6});
+    expect(foo.bar).toBe(6);
+  });
+
+
 
 });
