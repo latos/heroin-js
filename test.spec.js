@@ -46,6 +46,20 @@ describe('Injector', function() {
     expect(obj.x).toBe(10);
   });
 
+  it('applies "this" in invoke', function() {
+    var inj = new Injector();
+    inj.value('foo', 'hello');
+
+    var invoke = inj.get('invoke');
+
+    var obj = { x: '!!' };
+
+    function func(foo, bar) { return foo + ' ' + bar + this.x; }
+
+    expect(inj.invoke(func, obj, { bar:'there' })).toBe('hello there!!');
+    expect(    invoke(func, obj, { bar:'there' })).toBe('hello there!!');
+  });
+
   it('resolves providers once', function() {
     var n = 0;
     var inj = new Injector();
