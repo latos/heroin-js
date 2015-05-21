@@ -84,10 +84,11 @@
     };
   };
 
-  Injector.prototype.child = function(mappings) {
+  Injector.prototype.child = function(/* mappings... */) {
     var child = new Injector(this);
-    if (mappings) {
-      child.load(mappings);
+    var l = arguments.length;
+    for (var i = 0; i < l; i++) {
+      child.load(arguments[i]);
     }
     return child;
   };
