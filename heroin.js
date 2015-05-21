@@ -61,6 +61,8 @@
     this.make = this.values.make;
     this.make.__proto__ = this;
 
+    this._evaluating = {};
+
     // Use the parent's annotate function if present, otherwise funcParams.
     // E.g. if the ultimate ancestor is angular's injector, we will automatically
     // support other annotate strategies such as $inject property or array method.
@@ -298,7 +300,14 @@
       return this.values[name];
     }
     if (this.providers[name]) {
+      if (this._evaluating[name]) {
+        throw new Error("Circular dependency on " + name);
+      }
+
+      this._evaluating[name] = true;
       var ret = this.values[name] = this.invoke(this.providers[name], null);
+      delete this._evaluating[name];
+
       if (ret === void 0) {
         throw new Error('provider returned undefined for ' + name);
       }
