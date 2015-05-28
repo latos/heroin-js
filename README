@@ -1,5 +1,0 @@
-Scope-based injection framework
-
-Object life-cycle is not purely global - providers and objects can exist in nested "scopes" that hang off parent scopes.
-
-Very useful for building complex UIs or for request-scope handling on a server.
