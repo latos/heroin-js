@@ -119,6 +119,11 @@
     return func.apply(self, this.resolveArgs(func, extraArgs, false));
   };
 
+  /* Invoke with new child scope, putting the provided args in the child scope */
+  Injector.prototype.convoke = function(func, self, extraArgs) {
+    return new Injector(this, extraArgs).invoke(func, self, {});
+  };
+
   Injector.prototype.instantiate = function(ctor, extraArgs) {
     if (!ctor) {
       throw new Error("Constructor not provided");
