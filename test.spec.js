@@ -197,5 +197,22 @@ describe('Injector', function() {
     expect(bar2).toBe(5);
   });
 
+  it('convokes with provided args in new child scope', function() {
+
+    var di = new Injector();
+
+    function func1 (di) {
+      di.convoke(func2, null, {foo: 5});
+    };
+    function func2 (di) {
+      di.invoke(func3);
+    };
+    function func3 (foo) {
+      expect(foo).toBe(5);
+    };
+
+    di.invoke(func1);
+  });
+
 });
 
